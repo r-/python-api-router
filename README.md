@@ -1,4 +1,4 @@
-# python-api-router
+# Python Api Router
 
 A lightweight API proxy with multi-tenant auth and upstream routing.
 
@@ -138,3 +138,4 @@ Architecture: [Pragmatic Modular Monolith](https://github.com/r-/pragmatic-modul
 ## License
 
 MIT
+
