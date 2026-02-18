@@ -1,0 +1,32 @@
+# API Router Configuration
+# Copy to config.yaml and adjust for your setup.
+
+# --- Upstream targets (external services the proxy can talk to) ---
+targets:
+  openrouter:
+    baseUrl: https://openrouter.ai/api/v1
+    defaultHeaders:
+      Content-Type: "application/json; charset=utf-8"
+
+# --- Secrets (resolved from environment variables via ${...}) ---
+secrets:
+  or_rk1: "Bearer ${OPENROUTER_KEY_RK1}"
+  or_rk2: "Bearer ${OPENROUTER_KEY_RK2}"
+
+# --- Clients (one entry per clientKey you hand out) ---
+clients:
+  rk-robot-1:
+    target: openrouter
+    authHeaderRef: or_rk1
+    allowedMethods: [POST]
+    allowedPaths:
+      - /chat/completions
+    timeoutMs: 60000
+
+  rk-robot-2:
+    target: openrouter
+    authHeaderRef: or_rk2
+    allowedMethods: [POST]
+    allowedPaths:
+      - /chat/completions
+    timeoutMs: 60000
