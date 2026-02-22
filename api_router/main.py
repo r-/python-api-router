@@ -14,13 +14,14 @@ from fastapi.responses import JSONResponse, Response
 
 from api_router.composition.startup import create_proxy_service
 from api_router.modules.proxy import ProxyError, ProxyRequest
+import robert
 
 # --- App setup ---
 
 app = FastAPI(
     title="API Router",
-    description="Lightweight API proxy with multi-tenant auth",
-    version="0.1.0",
+    description="Lightweight API proxy with multi-tenant auth + R.O.B.E.R.T. Bridge",
+    version="0.1.1",
 )
 
 app.add_middleware(
@@ -52,6 +53,42 @@ def _extract_client_key(request: Request) -> str:
     if not auth.startswith("Bearer "):
         return ""
     return auth.removeprefix("Bearer ").strip()
+
+
+@app.post("/agent")
+async def agent(request: Request) -> Response:
+    """R.O.B.E.R.T. Bridge endpoint.
+
+    Expects JSON body:
+    {
+      "message": "hello",
+      "session_key": "user-1"  // optional
+    }
+    """
+    client_key = _extract_client_key(request)
+
+    # We reuse the policy check for authentication
+    _proxy_service.validate_client(client_key)
+
+    payload = await request.json()
+    message = str(payload.get("message", ""))
+    session_key = str(payload.get("session_key", "web-default"))
+
+    if not message:
+        return JSONResponse(status_code=400, content={"error": "missing_message"})
+
+    # Call the Agent's Python API (in-process)
+    try:
+        response = await robert.process(message, session_key)
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": "agent_error", "detail": str(e)},
+        )
+
+    return JSONResponse(
+        content={"content": response.content, "iterations": response.iterations}
+    )
 
 
 @app.post("/proxy")

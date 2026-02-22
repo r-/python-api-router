@@ -13,7 +13,12 @@ dependencies = [
     "httpx>=0.25.0",
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
+    "agent-robert",
 ]
+
+[tool.uv.sources]
+agent-robert = { path = "../agent-robert/agent", editable = true }
+
 
 [project.optional-dependencies]
 dev = [

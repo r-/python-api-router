@@ -57,7 +57,7 @@ class ProxyService:
 
     async def handle(self, request: ProxyRequest) -> ProxyResponse:
         """Process a proxy request: authenticate, check policy, forward upstream."""
-        policy = _get_policy(self._config, request.client_key)
+        policy = self.validate_client(request.client_key)
         _check_allowed(policy, request.method, request.path)
         target = _get_target(self._config, policy.target)
         headers = _build_upstream_headers(
@@ -75,6 +75,10 @@ class ProxyService:
             body=request.body,
             timeout_ms=policy.timeout_ms,
         )
+
+    def validate_client(self, client_key: str) -> Any:
+        """Public method to validate a clientKey without exposing internals."""
+        return _get_policy(self._config, client_key)
 
 
 # ─── INTERNAL (private — do not import from outside) ──
